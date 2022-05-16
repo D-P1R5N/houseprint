@@ -1,0 +1,333 @@
+{% extends "__baselayout.html" %}
+{% block navbar %}
+<li class="nav-item">
+  <a class="nav-link" href="#">Token_Link</a>
+</li>
+{% endblock navbar %}
+
+{% block sidebar %}
+<ul class="nav flex-column justify-content-between align-items-center">
+  <li class="nav-item">
+    <!--Here we have the SCAN BARCODE element just a few pixels offset from the rest. Look for fix in future-->
+    <h6 class="sidebar-heading d-flex justify-content-between align-items-center d-flex mt-4 mb-1 text-muted">
+      <span>Scan Barcode</span>
+      <button type="button" name="button" class="btn d-flex text-muted" onclick="scanBarcodeTemplate()">
+        <span data-feather="align-right" style="transform: rotate(90deg);"></span>
+      </button>
+    </h6>
+  </li>
+  <li class="nav-item">
+    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-1 mt-1 mb-1 text-muted">
+      <span>Search</span>
+      <button type="submit" name="SEARCH" id="searchSubmit" class="btn d-flex text-muted" form="searchForm">
+        <span data-feather="search"></span>
+      </button>
+    </h6>
+
+    <form class="d-flex text-muted" id="searchForm" action="{{url_for('inventory.inventory')}}" method="post">
+      <fieldset class="form-group">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token () }}">
+        <div class="form-group px-1">
+          <input class="form-control" type="text" name="search" id="searchInput" value="" placeholder="Search">
+        </div>
+      </fieldset>
+    </form>
+  </li>
+</ul>
+
+<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-1 mt-2 mb-1 text-muted">
+  <span>Categories</span>
+  <button type="button" name="button" class="btn d-flex text-muted" onclick="categoryPushTemplate()">
+    <span data-feather="plus-circle"></span>
+  </button>
+</h6>
+<ul id="categoryList" class="nav flex-column mb-2 justify-content-between align-items-center">
+  {% for category in categories %}
+    <li class="nav-item">
+      <a href="" class="nav-link" onclick="return categoryInventory('{{category.name}}')">{{category.name}}</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock sidebar %}
+
+{% block content %}
+  <div class="y-scroll">
+    <table class="table table-hover y-scroll">
+      <thead>
+        <tr>
+          <th>Item ID</th>
+          <th>Name</th>
+          <th>Quantity</th>
+          <th>Update</th>
+        </tr>
+      </thead>
+      <tbody id="inventoryBody">
+        {% for item in inventory %}
+        <!--index is offset due to SQL base 1 indexing-->
+        {% set index = item.id - 1 %}
+          <tr>
+            <td>{{item.id}}</td>
+            <td>{{item._item.name}}</td>
+            <td>{{item.quantity}}</td>
+            <td>
+              <button type="button" class="btn btn-info btn-sm" onclick="itemUpdate('{{index}}')" name="button">Update</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+{% block templates %}
+<!--templates are found by arr.filter() on the template's ID-->
+<template id="categoryPushForm">
+  <div class="container">
+    <form class="form" action="" method="post">
+      <fieldset class='form-group'>
+        <div class="form-group">
+          <input type="text" name="categoryNameInput" id="categoryNameInput" value="" placeholder="Enter category name.">
+        </div>
+      </fieldset>
+    </form>
+    <div class="container-fluid justify-content-end align-items-end">
+      <button type="button" name="categorySubmit" onclick="categoryPush()" class="btn btn-md btn-success">Submit</button>
+      <button type="button" name="categoryCancel" onclick="clearModal()" class="btn btn-md btn-danger">Cancel</button>
+    </div>
+  </div>
+</template>
+
+<template id="sidebarRowTemplate">
+  <li class="nav-item">
+    <a href="" id="sidebarRow" class="nav-link"></a>
+  </li>
+</template>
+
+<template id="barcodeScanTemplate">
+  <div class="container">
+    <form method="post">
+      <fieldset class="form-group">
+        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+        <div class="form-group">
+          <input class="form-control d-flex text-muted" type="text" id="barcodeInput" name="barcodeInput" value="" placeholder="Scan Item, Press 'Enter' if necessary">
+        </div>
+      </fieldset>
+    </form>
+    <div id="itemRoster" class="container vstack d-flex justify-content-between align-items-center mt-2 y-scroll yhide" style="max-height:calc(100vh * .65);">
+
+    </div>
+    <div class="horizontal-line"></div>
+    <div class="d-flex" style="float:right;">
+      <button class="btn btn-success px-3 mx-2" type="button" name="barcodeSubmit" onclick="barcodePush()">Submit</button>
+      <button class="btn btn-danger px-3 mx-2" type="button" name="barcodeCancel" onclick="clearModal()">Cancel</button>
+    </div>
+  </div>
+</template>
+
+<template id="itemTemplate">
+  <div class="card mb-1 mt-1 width100">
+    <div class="card-header" id="itemIsFound">
+
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Item Name:</th>
+            <th>Barcode:</th>
+            <th>Category:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="itemName"></td>
+            <td id="itemBarcode"></td>
+            <td id="itemCategory"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+{% endblock templates %}
+
+{% block modal %}
+
+{% endblock modal %}
+
+{% block scripts %}
+<!--Icon package-->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+      feather.replace();
+    </script>
+    <script type="text/javascript">
+      var dataWrapper = {
+        csrf:"{{csrf_token()}}",
+        scriptRoot: {{ request.script_root|tojson|safe }}
+      }
+    </script>
+
+<script type="text/javascript">
+  function categoryInventory(category){
+    alert(category);
+    return false
+  };
+  function searchInventory(){
+    let x = document.getElementById("#searchForm")
+    x.submit();
+    /*window.location.reload(true);*/
+    return false;
+  };
+/*
+  function searchInventory(){
+    let searchParam = $("#searchInput").val()
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', '{{url_for("inventory.inventory")}}')
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRFToken', dataWrapper.csrf);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        alert('Success')
+      } else if (xhr.status !== 200){
+        alert('Failure:' + xhr.status)
+      };
+    };
+    xhr.send(JSON.stringify({
+      search:searchParam
+    }));
+    return true;
+  };
+*/
+/*
+*Modal Populators
+*If created via <a>-tag you will need to return false to prevent page-wandering
+*Use of AJAX to push data updates to server
+*/
+  function categoryPushTemplate(){
+    /*Necessary in case of template ordering errors and bugs; can't use index*/
+    let catArray = [].slice.call(document.getElementsByTagName("template"));
+    let _ = catArray.filter(function e(idx) {
+      return idx.id === "categoryPushForm"
+    });
+    let newForm = _[0].content.firstElementChild.cloneNode(true);
+    showModal(newForm, "Add Category")
+    return false;
+  };
+
+  function categoryPush(){
+    let formData = $("#categoryNameInput").val()
+    let xhr = new XMLHttpRequest();
+    xhr.open('PUT', '{{url_for("inventory._category")}}');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRFToken', dataWrapper.csrf);
+    xhr.onload = function() {
+      if (xhr.status === 200 && xhr.responseText !== formData) {
+        alert('Something went wrong.' + xhr.responseText)
+      } else if (xhr.status !== 200) {
+        alert("Request failed. Status code:" + xhr.status);
+      } else if (xhr.status === 200 && xhr.responseText === formData){
+        clearModal();
+        updateSidebar(formData);
+      };
+    };
+    xhr.send(JSON.stringify({
+      category:formData
+    }));
+    return false;
+  };
+
+
+  function updateSidebar(category){
+    let arr = [].slice.call(document.getElementsByTagName("template"))
+    let row = arr.filter(function (e){return e.id === "sidebarRowTemplate"});
+    let newRow = row[0].content.firstElementChild.cloneNode(true);
+    $("#categoryList").append(newRow);
+    $(newRow).find("#sidebarRow").text(category);
+    /*This has got to be incorrect*/
+    $(newRow).find("#sidebarRow").on('click', function(){return categoryInventory(category);})
+    console.log($(newRow).find("#sidebarRow"));
+    return false;
+  };
+
+  function scanBarcodeTemplate(){
+    let arr = [].slice.call(document.getElementsByTagName("template"))
+    let temp = arr.filter(function (e){return e.id === "barcodeScanTemplate"});
+    let newTemp = temp[0].content.firstElementChild.cloneNode(true);
+    showModal(newTemp, "Scan Items");
+    /*This may be messy, it will reference template elements after
+    *they're created. There might be room for error within it.
+    */
+    barcodeConfig();
+    return false;
+  };
+
+  function itemCardTemplate(data, isKnown){
+    let arr = [].slice.call(document.getElementsByTagName("template"));
+    let temp = arr.filter(function (e){return e.id === "itemTemplate"});
+    let newTemp = temp[0].content.firstElementChild.cloneNode(true);
+    newTemp.querySelector("#itemIsFound").textContent = "Item Not Found";
+    newTemp.querySelector("#itemBarcode").textContent = data['barcode']
+    document.querySelector("#itemRoster").appendChild(newTemp);
+    return false;
+  };
+
+  function barcodeConfig(){
+    /*
+    *Here we have the configuration to block the form from
+    *being submitted. Instead an XMLHttpRequest is sent
+    *and our program will create cards based on the result.
+    *'false' result indicates Item not found, otherwise
+    *a JSON object will be passed with Name, Category, and Stock
+    */
+    let el = document.querySelector("#barcodeInput");
+    el.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        barcodePush();
+      };
+    });
+    return false;
+  };
+
+  function barcodePush(){
+    let formData = $("#barcodeInput").val();
+    /* information we can reasonably expect to receive */
+    let itemData = {
+      barcode: formData,
+      name: null,
+      category: null,
+      quantity: null
+    };
+    Object.keys(itemData).forEach(function(key, idx) {
+      console.log(key);
+      console.log(itemData[key])
+    });
+    let xhr = new XMLHttpRequest();
+    xhr.open('PUT', '{{url_for("inventory._barcode")}}');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRFToken', dataWrapper.csrf)
+    xhr.onload = function() {
+      if (xhr.status === 200 && xhr.responseText !== formData) {
+        /*Item not found in database xhr.responseText is "false"*/
+        itemCardTemplate(itemData, false);
+      } else if (xhr.status !== 200) {
+        /*Error here means either route changed or service is non-operational*/
+        alert('Request failed. Status code:' + xhr.status);
+      } else if (xhr.status === 200 && xhr.responseText === formData){
+        /*Item found in database response containse JSON data*/
+        let obj = JSON.parse(xhr.responseText);
+
+        Object.keys(obj).forEach(function(key, idx) {
+          itemData[key] = obj[key];
+        })
+      };
+      $("#barcodeInput").val('');
+    };
+    xhr.send(JSON.stringify({
+      barcode:formData
+    }));
+    return false;
+  };
+</script>
+{% endblock scripts %}

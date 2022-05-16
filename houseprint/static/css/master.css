@@ -1,0 +1,134 @@
+body {
+  background: #fafafafa;
+  color: #333333;
+  padding-top: 50px;
+}
+
+u.title-underline{
+  text-underline-position: under;
+  text-decoration-style: wavy;
+  text-decoration-line: underline overline;
+  text-decoration-thickness: 5%
+}
+/*
+Bootstrap modifiers
+*/
+.justify-flex-end{
+  justify-content: flex-end;
+}
+a.nav-link:hover {
+  color: #00bba9;
+}
+/*
+*Sidebar
+*/
+.sidebar{
+  float: left;
+  position:fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0;
+  box-shadow: inset -1px 0 0 rgba(0,0,0,.1);
+}
+.sidebar-sticky{
+  position: -webkit-sticky;
+  position: sticky;
+  top: 48px;
+  height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.sidebar .nav-link{
+  font-weight: 500;
+  color: #0b5240;
+}
+
+.sidebar .nav-link:focus .nav-link:hover .nav-link:active{
+  color: #59e3c0;
+}
+
+
+.sidebar-heading {
+  font-size: .8rem;
+  width: 100%;
+  text-transform: uppercase;
+}
+
+/*
+*Content
+*/
+.content{
+  float:right;
+  text-align:end;
+}
+
+.bg-steel {
+  background-color: #5f788a;
+}
+
+.bg-alum {
+  background-color: #9bc3e0;
+}
+
+.bg-blue {
+  background-color: #b8dfff;
+}
+
+/*
+*Navbar-Top
+*/
+.fixed-top {
+  top: 0;
+  right: 0;
+  position: fixed;
+  width: 100%;
+  border: 1px solid #5cab97
+}
+
+/*This is the central header CSS*/
+.central-header{
+  display:inline-block;
+  width:100%;
+}
+
+/*This is functional CSS*/
+.y-scroll {
+  overflow-y:scroll;
+}
+
+.yhide::-webkit-scrollbar {
+  display: none;
+}
+
+.width100 {
+  width:100%;
+}
+
+.width-auto {
+  width: auto;
+}
+
+.horizontal-line {
+  width: 100%;
+  height: 0px;
+  float: bottom;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  border: 1px inset;
+}
+
+.right {
+  float: right;
+}
+
+.bottom{
+  float: bottom;
+}
+
+/* Card */
+.list-group-item {
+  flex: 50%;
+
+}
