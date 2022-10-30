@@ -31,9 +31,6 @@ def create(config_class=Config):
         from houseprint.inventory.models import Item, Inventory, Category
         db.create_all()
         if not User.query.count() > 0:
-            #populate an admin account on the empty database
-            admin = User(username="_0Admin", email="_0Admin@admin.com", password=bcrypt.generate_password_hash("_0Admin0_").decode('utf-8'))
-            db.session.add(admin)
             db.session.commit()
 
     from houseprint.users.routes import user

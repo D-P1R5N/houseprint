@@ -8,4 +8,3 @@ class Recipe(FlaskForm):
 
 
 class Ingredient(FlaskForm):
-    

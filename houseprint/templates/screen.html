@@ -1,0 +1,75 @@
+{% extends "__baseLayout.html" %}
+
+{% block navbar %}
+<li class="nav-item">
+  <a class="nav-link" href="{{url_for('inventory.inventory')}}">Inventory</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="#">Token_Link</a>
+</li>
+{% endblock navbar %}
+
+{% block sidebar %}
+<ul class="nav flex-column justify-content-between align-items-center">
+  <li class="nav-item">
+    <!--Here we have the SCAN BARCODE element just a few pixels offset from the rest. Look for fix in future-->
+    <h6 class="sidebar-heading d-flex justify-content-between align-items-center d-flex mt-4 mb-1 text-muted">
+      <span>Start Feed</span>
+      <button type="button" name="button" class="btn d-flex text-muted" onclick="startFeed()">
+        <span data-feather="video"></span>
+      </button>
+    </h6>
+  </li>
+  <li class="nav-item">
+    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-1 mt-1 mb-1 text-muted">
+      <span>Stop Feed</span>
+      <button type="button" name="stopButton" id="stopButton" class="btn d-flex text-muted" onclick="stopFeed()">
+        <span data-feather="video-off"></span>
+      </button>
+    </h6>
+  </li>
+</ul>
+{% endblock sidebar %}
+
+{% block content %}
+  <div class="container-md container-lg">
+    <video id="videoElement" style="width:100%; height:100%;" autoplay poster="/static/placeholder.png">
+
+    </video>
+  </div>
+  <div class="container right align-items-center">
+    <button type="button" name="button" class="btn btn-success" onclick="startFeed()">Start</button>
+    <button type="button" name="button" class="btn btn-danger" onclick="stopFeed()">Stop</button>
+  </div>
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+  var video = document.querySelector("#videoElement");
+
+  function startFeed() {
+    if(navigator.mediaDevices.getUserMedia){
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+        })
+        .catch(function (error) {
+          alert('Webcam not found. Retry later');
+        });
+    };
+  }
+
+
+  function stopFeed() {
+    let stream = video.srcObject;
+    let tracks = stream.getTracks();
+
+    for (let i = 0; i< tracks.length; i++) {
+      let track = tracks[i];
+      track.stop();
+    }
+
+    video.srcObject = null;
+  }
+</script>
+{% endblock scripts %}

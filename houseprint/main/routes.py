@@ -9,4 +9,9 @@ main = Blueprint('main', __name__)
 @main.route("/home", methods=["GET", "POST"])
 def home():
     return render_template("index.html", _title="Housemates")
-    
+
+
+@main.route("/screen", methods=["GET","POST"])
+@login_required
+def screen():
+    return render_template("screen.html")

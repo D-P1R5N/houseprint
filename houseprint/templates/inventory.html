@@ -1,7 +1,7 @@
 {% extends "__baselayout.html" %}
 {% block navbar %}
 <li class="nav-item">
-  <a class="nav-link" href="#">Token_Link</a>
+  <a class="nav-link" href="{{url_for('main.screen')}}">Screen</a>
 </li>
 {% endblock navbar %}
 
@@ -157,11 +157,8 @@
 
 {% block scripts %}
 <!--Icon package-->
-<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-    <script>
-      feather.replace();
-    </script>
-    <script type="text/javascript">
+
+<script type="text/javascript">
       var dataWrapper = {
         csrf:"{{csrf_token()}}",
         scriptRoot: {{ request.script_root|tojson|safe }}
